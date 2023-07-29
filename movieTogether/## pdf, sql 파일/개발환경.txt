@@ -1,0 +1,10 @@
+MySQL 사용
+DB 스키마 : java505_team2_db
+DB 아이디, 비밀번호: full505, full505
+
+windows
+인텔리제이 사용
+자바 17버전
+빌드도구 : gradle
+
+로그인 기능 : 아이디/비밀번호 - test/1234 입력

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${movieTitle}">Title</title>
+  <link rel="stylesheet" href="/css/bootstrap.css">
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/jquery-3.7.0.js"></script>
+  <!-- css파일 -->
+  <link href="/css/style.css" rel="stylesheet">
+  <link href="/css/movie-style.css" rel="stylesheet">
+  <!-- 디테일페이지 자바스크립트 -->
+  <script>
+    let userId = "[[${userId}]]"
+    // 최초 모델앤뷰로 pk값 받아옴
+    let moviePk = "[[${pk}]]";
+    let movieTitle = "[[${movieTitle}]]";
+  </script>
+  <script src="/js/detailPage.js"></script>
+  <!--  영화제목 변환기 : conv() 함수 포함-->
+  <script src="/js/movieNameConverter.js"></script>
+</head>
+<body>
+
+<header th:replace="~{layout/header :: header-basic}"></header>
+<main class="container-md my-5">
+
+  <!-- 영화 정보 -->
+  <div class="mb-2 mt-5 row justify-content-md-center" id="movieInfo">
+
+    <div class="col-4" id="poster">
+      <!-- 포스터 들어감 -->
+    </div>
+
+    <!--        포스터 우측에 표시되는 정보-->
+    <div class="movieInfoTxt col-8 pt-3">
+      <div class="d-flex justify-content-between row mb-0">
+
+        <div class="col ps-2 ms-1">
+
+          <h1 class="movie-detail-tit" id="movieTitle"></h1>
+          <div class="h5">
+            <div id="genres" class="infoItem"><span>장르 </span></div>
+          </div>
+          <div class="row h5 my-0 mb-2">
+            <div class="col">
+              <div class="infoItem mt-0" id="releaseDate"><span>개봉일 </span></div>
+              <div class="infoItem" id="runningTime"><span>상영시간 </span></div>
+              <div class="infoItem" id="audience"><span>누적관객 </span></div>
+            </div>
+            <div class="col">
+              <div class="infoItem mt-0" id="nations"><span>국가 </span></div>
+              <div class="infoItem" id="gradeAge"><span>등급 </span></div>
+              <div class="infoItem" id="boxOfficeRank"><span>주간 박스오피스 </span></div>
+              <!-- 주간으로 변경했습니다! kdu -->
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-2">
+          <button id="likeBtn" type="button" class="border-0 text-center px-3">
+            <div id="likeBtnImg" class="mx-auto py-0"></div>
+            <p class="my-0 py-0 like-msg">좋아요</p>
+            <p id="likeCnt" class="text-center"></p>
+          </button>
+        </div>
+
+      </div>
+
+      <div id="casts" class="mb-3 mt-4 mx-0">
+        <p class="h5 infoItem"><span>출연/제작</span></p>
+      </div>
+
+      <div id="overview" class="mb-3 mt-5 mx-0">
+        <p class="h5 infoItem"><span>줄거리</span></p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!--<hr class="mb-5">-->
+
+  <!-- 상영 시간표 -->
+  <div class="row justify-content-md-center">
+    <div class="col-12 d-flex justify-content-start">
+      <h4 class="h5 mb-3 sub-tit">상영 시간표</h4>
+      <h5 class="sub-tit2">영화관별 상영 시간을 확인해보세요.</h5>
+    </div>
+  </div>
+  <div id="ticketing" class="row justify-content-md-center">
+  <!--<div id="ticketing" class="d-flex flex-column ">-->
+      <!-- 캘린더 -->
+      <div class="col-4">
+        <table class="Calendar bg-white p-2 py-3 table w-100">
+          <thead>
+          <tr>
+            <td>
+              <button type="button" id="prev" class="btn btn-sm btn-secondary opacity-50"> < </button>
+            </td>
+            <td colspan="5" class="text-center h4">
+              <span id="calYear"></span><span>년</span>
+              <span id="calMonth"></span><span>월</span>
+            </td>
+            <td>
+              <button type="button" id="next" class="btn btn-sm btn-secondary opacity-50"> > </button>
+            </td>
+          </tr>
+          <tr>
+            <td>일</td>
+            <td>월</td>
+            <td>화</td>
+            <td>수</td>
+            <td>목</td>
+            <td>금</td>
+            <td>토</td>
+          </tr>
+          </thead>
+          <tbody>
+          <tr id="calTr0"></tr>
+          <tr id="calTr1"></tr>
+          <tr id="calTr2"></tr>
+          <tr id="calTr3"></tr>
+          <tr id="calTr4"></tr>
+          <tr id="calTr5"></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 영화 시간 나오는 영역 -->
+      <div class="col-8 time-list">
+        <div class="my-2 btn-group mb-3">
+          <button value="megaBox" class="timeTableBtn btn btn-outline-pink px-4">메가박스</button>
+          <button value="lotteCinema" class="timeTableBtn btn btn-outline-pink px-4">롯데시네마</button>
+          <button value="cgv" class="timeTableBtn btn btn-outline-pink px-4">CGV</button>
+        </div>
+
+        <div id="megaBox" class="timeTable d-none">
+          <select class="sel1 movie-area" id="megaBoxArea">
+            <option value="">지역을 선택하세요</option>
+          </select>
+          <select class="sel2 movie-theater" id="megaBoxTheater">
+            <option>영화관을 선택하세요</option>
+          </select>
+          <a href="https://www.megabox.co.kr/booking" class="float-end movie-direct-btn">▶ 메가박스 바로가기</a>
+          <p id="megaBoxLoad" class="load">로딩 중..</p>
+          <ul id="megaBoxUl" class="load-list"></ul>
+        </div>
+        <div id="lotteCinema" class="timeTable d-none">
+          <select class="sel1 movie-area" id="lotteCinemaArea">
+            <option value="">지역을 선택하세요</option>
+          </select>
+          <select class="sel2 movie-theater" id="lotteCinemaTheater">
+            <option>영화관을 선택하세요</option>
+          </select>
+          <a href="https://www.lottecinema.co.kr/NLCHS/Ticketing" class="float-end movie-direct-btn">▶ 롯데시네마 바로가기</a>
+          <p id="lotteCinemaLoad" class="load">로딩 중..</p>
+          <ul id="lotteCinemaUl" class="load-list"></ul>
+        </div>
+        <div id="cgv" class="timeTable d-none">
+          <select class="sel1 movie-area" id="cgvArea">
+            <option value="">지역을 선택하세요</option>
+          </select>
+          <select class="sel2 movie-theater" id="cgvTheater">
+            <option>영화관을 선택하세요</option>
+          </select>
+          <a href="http://www.cgv.co.kr/ticket/" class="float-end movie-direct-btn">▶ CGV 바로가기</a>
+          <p id="cgvLoad" class="load">로딩 중..</p>
+          <ul id="cgvUl" class="load-list"></ul>
+        </div>
+      </div>
+
+  </div>
+
+  <hr class="my-5">
+
+  <div id="reviewDiv">
+    <!-- 나의 리뷰 영역 -->
+    <div class="row justify-content-md-center" th:if="${session.userName}">
+      <!-- 타이틀, 버튼 -->
+      <div class="col-12">
+        <div class="d-flex justify-content-between">
+          <div class="d-flex justify-content-start">
+            <h4 class="h5 mb-3 sub-tit">나의 리뷰</h4>
+            <span class="sub-tit2">나만의 영화 리뷰를 남겨보세요.</span>
+          </div>
+          <div class="" style="margin-bottom: -2rem; z-index: 1000;">
+            <button id="writeReviewBtn" class="btn btn-pink px-3" type="button" data-bs-toggle="modal"
+                    data-bs-target="#writeReview">리뷰작성
+            </button>
+          </div>
+        </div>
+        <div id="myReviewSpace" class=" d-flex flex-wrap justify-content-start align-items-center mb-5 px-0">
+          <!-- 리뷰 목록 들어가는 곳-->
+        </div>
+      </div>
+      <hr class="">
+    </div>
+
+
+
+    <!-- 전체 리뷰 영역 -->
+    <div class="row justify-content-md-center">
+      <div class="col-12">
+        <p class="h5 my-4 mt-0 w-100 sub-tit">전체 리뷰</p>
+        <div id="reviewSpace" class="col-12 d-flex flex-wrap justify-content-start align-items-center mb-5">
+          <!-- 전체 리뷰 목록 들어가는 곳 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 모달 창 목록 -->
+  <!-- 리뷰 작성 -->
+  <div class="modal" id="writeReview">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between"><span>리뷰 작성</span></div>
+        <div class="modal-body">
+          <form id="review">
+            <div id="stars" class="d-flex align-items-center justify-content-center ms-5">
+              <div id="starShow" class="d-block" style="position: relative">
+                <div id="starBtn" class="btn-group" style="position: absolute">
+                  <button type="button" class="star" value="1"></button>
+                  <button type="button" class="star" value="2"></button>
+                  <button type="button" class="star" value="3"></button>
+                  <button type="button" class="star" value="4"></button>
+                  <button type="button" class="star" value="5"></button>
+                  <button type="button" class="star" value="6"></button>
+                  <button type="button" class="star" value="7"></button>
+                  <button type="button" class="star" value="8"></button>
+                  <button type="button" class="star" value="9"></button>
+                  <button type="button" class="star" value="10"></button>
+                </div>
+              </div>
+              <div class="ms-3 h5 my-auto">
+                <input id="starNum" style="width: 2rem; height: 1rem" readonly type="text" value="1">
+              </div>
+            </div>
+
+            <label for="title" class="form-label">제목</label>
+            <input class="form-control" id="title" type="text" name="reviewTitle" required>
+            <label for="content" class="form-label">내용</label>
+            <textarea name="reviewContent" id="content" rows="5" class="form-control w-100"
+                      required></textarea>
+
+          </form>
+        </div>
+        <div class="modal-footer p-1">
+          <button type="button" class="btn btn-pink" id="submitBtn" data-bs-dismiss="modal" disabled>확인</button>
+          <button type="reset" class="btn btn-dark" id="erase">지우기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리뷰 수정 -->
+  <div class="modal" id="editReview">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between"><span>리뷰 수정</span></div>
+        <div class="modal-body">
+          <form id="editreviewFrm">
+            <div id="stars2" class="d-flex align-items-center justify-content-center ms-5">
+              <div id="starShow2" class="d-block" style="position: relative">
+                <div id="starBtn2" class="btn-group" style="position: absolute">
+                  <button type="button" class="star2" value="1"></button>
+                  <button type="button" class="star2" value="2"></button>
+                  <button type="button" class="star2" value="3"></button>
+                  <button type="button" class="star2" value="4"></button>
+                  <button type="button" class="star2" value="5"></button>
+                  <button type="button" class="star2" value="6"></button>
+                  <button type="button" class="star2" value="7"></button>
+                  <button type="button" class="star2" value="8"></button>
+                  <button type="button" class="star2" value="9"></button>
+                  <button type="button" class="star2" value="10"></button>
+                </div>
+              </div>
+              <div class="ms-3 h5 my-auto">
+                <input id="starNum2" style="width: 2rem; height: 1rem" readonly type="text" value="1">
+              </div>
+            </div>
+            <input type="hidden" id="editPk">
+            <label for="title" class="form-label">제목</label>
+            <input class="form-control" id="titleEdit" type="text" name="reviewTitle" required>
+            <label for="content" class="form-label">내용</label>
+            <textarea name="reviewContent" id="contentEdit" rows="5" class="form-control w-100"
+                      required></textarea>
+
+          </form>
+        </div>
+        <div class="modal-footer p-1">
+          <button class="btn btn-pink" type="button" id="editSubmitBtn" data-bs-dismiss="modal">확인</button>
+          <button class="btn btn-dark" type="reset" id="eraseEdit">지우기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리뷰 상세보기 -->
+  <div class="modal" id="reviewDetail">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between"><span class="modalTitle"></span><span
+          class="modalStar"></span></div>
+        <div class="modal-body">
+          <p></p>
+          <div class="reviewLikeModal mt-5 text-center">
+            <button type="button" class="btn reviewLikeBtn py-1 px-2 btn-outline-pink" value="">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                   class="bi bi-hand-thumbs-up-fill" viewBox="0 0 16 16">
+                <path
+                  d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+<footer th:replace="~{layout/footer :: footer-basic}"></footer>
+
+</body>
+
+</html>
